@@ -1,0 +1,689 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>GRE 刷题</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--fs:16px;--blue:#5e35b1;--soft:#ede7f6;--line:#e6e8eb;--ok:#2e7d32;--bad:#c62828}
+html,body{overscroll-behavior-y:contain}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC','Microsoft YaHei',sans-serif;background:#f5f5f7;color:#111}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer}
+[hidden]{display:none!important}
+/* ---- home ---- */
+.top{position:sticky;top:0;z-index:100;background:#fff;padding-top:env(safe-area-inset-top);box-shadow:0 1px 0 var(--line)}
+.tab-bar{display:flex}
+.tab-btn{flex:1;padding:12px 4px 10px;border:none;background:none;font-size:15px;font-weight:500;color:#555;border-bottom:3px solid transparent}
+.tab-btn.active{color:var(--blue);border-bottom-color:var(--blue)}
+.subbar{display:flex;gap:8px;align-items:center;padding:7px 12px;border-top:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.subbar::-webkit-scrollbar{display:none}
+.seg{display:flex;flex:0 0 auto;border:1px solid #d0d7de;border-radius:16px;overflow:hidden}
+.seg button{border:none;background:#fff;padding:6px 12px;font-size:13px;white-space:nowrap}
+.seg button+button{border-left:1px solid #d0d7de}
+.seg button.on{background:var(--blue);color:#fff}
+.home{padding:12px 12px calc(84px + env(safe-area-inset-bottom));max-width:820px;margin:0 auto}
+.sec-h{font-size:13px;font-weight:600;color:#666;margin:16px 4px 8px;display:flex;justify-content:space-between;align-items:baseline}
+.sec-h small{font-weight:400;color:#999}
+.today{background:#fff;border-radius:12px;padding:12px;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.today-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.today-h b{font-size:15px}
+.today-h span{font-size:12px;color:#888}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.tchip{border:1px solid #d1c4e9;background:#fff;border-radius:16px;padding:5px 11px;font-size:13px}
+.tchip.done{background:#e8f5e9;border-color:#a5d6a7;color:#1b5e20}
+.tchip.part{background:#fff8e1;border-color:#ffe082}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.tile{background:#fff;border:1px solid #e3e3e8;border-radius:10px;padding:10px 8px 8px;text-align:left;position:relative;min-height:66px}
+.tile b{display:block;font-size:14px}
+.tile small{display:block;font-size:12px;color:#888;margin-top:2px}
+.tile .bar{position:absolute;left:8px;right:8px;bottom:7px;height:4px;border-radius:2px;background:#eee;overflow:hidden}
+.tile .bar i{display:block;height:100%;background:var(--blue)}
+.tile.done{border-color:#a5d6a7}
+.tile.done .bar i{background:var(--ok)}
+.tile.today{box-shadow:0 0 0 2px var(--blue) inset}
+.rowbtns{display:flex;gap:8px;margin-top:4px}
+.bigbtn{flex:1;border:1px solid #e3e3e8;background:#fff;border-radius:10px;padding:12px;text-align:left}
+.bigbtn b{display:block}
+.bigbtn small{color:#888}
+/* ---- practice ---- */
+.prac{position:fixed;inset:0;background:#f5f5f7;z-index:200;display:flex;flex-direction:column}
+.p-top{background:#fff;padding:calc(6px + env(safe-area-inset-top)) 8px 6px;display:flex;align-items:center;gap:6px;box-shadow:0 1px 0 var(--line)}
+.p-top .back{border:none;background:none;font-size:22px;width:38px;height:38px}
+.p-top .t{flex:1;min-width:0}
+.p-top .t b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-top .t small{font-size:12px;color:#888}
+.p-top .star{font-size:23px}
+.prog{height:3px;background:#eee}
+.prog i{display:block;height:100%;background:var(--blue);transition:width .2s}
+.p-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 14px 20px;font-size:var(--fs)}
+.p-body>*{max-width:760px;margin-left:auto;margin-right:auto}
+.p-foot{background:#fff;border-top:1px solid var(--line);padding:8px 10px calc(8px + env(safe-area-inset-bottom));display:flex;gap:8px;align-items:center}
+.p-foot button{border:none;border-radius:22px;padding:11px 0;font-size:15px}
+.p-foot .nav{flex:0 0 26%;background:#eceff1;color:#455a64}
+.p-foot .nav:disabled{opacity:.35}
+.p-foot .main{flex:1;background:var(--blue);color:#fff}
+.p-foot .main:disabled{background:#b39ddb}
+.star{border:none;background:none;font-size:21px;color:#c2c2c2;padding:0 2px;line-height:1}
+.star.on{color:#f5a623}
+.qmeta{font-size:12px;color:#888;margin-bottom:6px}
+.stem{line-height:1.65}
+.stem img,.opt img,.why img,.passage img{max-width:100%;height:auto;display:block;margin:6px auto}
+.stem svg,.opt svg,.why svg{max-width:100%}
+.mathwrap{overflow-x:auto}
+.zh{color:#444;font-size:.92em;line-height:1.65}
+.passage{line-height:1.75;background:#fff;border:1px solid #e6e6ea;border-radius:8px;padding:10px 12px;margin-bottom:10px;max-height:42vh;overflow-y:auto}
+.passage.full{max-height:none}
+.passage p{margin:0 0 8px}
+.passage strong{background:#fff3a3;font-weight:600}
+.reading-sentence{background:#d1c4e9}
+.ptools{display:flex;gap:6px;margin:-4px 0 10px}
+.qa{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.qa>div{border:1px solid #e0e0e0;border-radius:8px;padding:8px;text-align:center;background:#fff;overflow-x:auto}
+.qa .lab{font-size:12px;color:#888;margin-bottom:4px}
+.group-t{font-size:12px;color:#888;margin:12px 0 2px}
+.opts{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.opt{border:1.5px solid #e0e0e0;border-radius:10px;padding:11px 12px;background:#fff;text-align:left;line-height:1.5;display:flex;gap:10px;align-items:flex-start;min-height:48px}
+.opt .l{font-weight:600;color:#888;flex-shrink:0;min-width:16px}
+.opt .c{min-width:0;flex:1;overflow-x:auto}
+.opt .cn{display:block;font-size:.85em;color:#666}
+.opt.sel{border-color:var(--blue);background:var(--soft)}
+.opt.ok{border-color:var(--ok);background:#e8f5e9}
+.opt.bad{border-color:var(--bad);background:#ffebee}
+.fill-row{display:flex;align-items:center;gap:6px;margin-top:14px}
+.fill-row input{border:1.5px solid #c5cae9;border-radius:8px;padding:10px 12px;flex:1;max-width:220px;font-size:17px}
+.fill-row input.ok{border-color:var(--ok);background:#e8f5e9}.fill-row input.bad{border-color:var(--bad);background:#ffebee}
+.verdict{margin-top:12px;font-weight:600;font-size:15px}
+.verdict.ok{color:var(--ok)}.verdict.bad{color:var(--bad)}
+.why{background:#f6f8e8;border-radius:8px;padding:10px 12px;margin-top:10px;line-height:1.65;font-size:.93em;white-space:pre-wrap}
+.why.html{white-space:normal}
+.why p{margin:0 0 6px}
+.mini{border:1px solid #cfd8dc;background:#fff;color:#455a64;border-radius:14px;padding:4px 11px;font-size:12px}
+.wchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{display:inline-flex;align-items:center;border:1px solid #d1c4e9;background:#fff;border-radius:14px;padding:1px 4px 1px 2px;font-size:13px}
+.chip .star{font-size:17px}
+.chip .wl{border:none;background:none;padding:3px 5px;color:#4527a0}
+.chip.known .wl{color:#9e9e9e;text-decoration:line-through}
+.label-s{font-size:12px;color:#888;margin-top:12px}
+.drill-stem{font-size:1.7em;font-weight:600;margin:18px 0 6px;text-align:center}
+.drill-actions{display:flex;gap:8px;margin-top:12px}
+.drill-actions button{flex:1;border:1px solid #ffcc80;background:#fff3e0;color:#e65100;border-radius:10px;padding:10px}
+.kbtn{border:1px solid #cfd8dc;background:#fff;border-radius:14px;padding:4px 11px;font-size:13px}
+.kbtn.on{background:#455a64;border-color:#455a64;color:#fff}
+/* summary */
+.sum{text-align:center;padding-top:20px}
+.sum .score{font-size:44px;font-weight:700;color:var(--blue)}
+.sum .sub{color:#666;margin-bottom:14px}
+.wrongs{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:10px 0 18px}
+.wrongs button{border:1px solid #ef9a9a;background:#ffebee;color:#b71c1c;border-radius:8px;width:44px;height:38px}
+.sum .acts{display:flex;flex-direction:column;gap:10px;max-width:320px;margin:0 auto}
+.sum .acts button{border:none;border-radius:22px;padding:12px;font-size:15px;background:#eceff1;color:#455a64}
+.sum .acts button.primary{background:var(--blue);color:#fff}
+/* words */
+.card{background:#fff;border-radius:10px;padding:12px 14px;margin-bottom:12px;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.toolbar{display:flex;gap:8px;margin-bottom:8px}
+.toolbar select,.toolbar input{border:1px solid #d0d7de;border-radius:16px;background:#fff;padding:6px 12px;font-size:13px}
+.toolbar input{flex:1;min-width:0}
+.word-row{display:flex;align-items:center;gap:8px;border-top:1px solid #f0f0f0;padding:10px 0}
+.word-row:first-child{border-top:none}
+.word-row .w{font-weight:600}
+.word-row .m{flex:1;min-width:0;color:#444;font-size:.92em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.word-row.known .w{color:#9e9e9e;text-decoration:line-through}
+.meta{font-size:12px;color:#888;margin:0 2px 8px;display:flex;justify-content:space-between}
+.more{display:block;margin:4px auto 16px;border:1px solid #d0d7de;background:#fff;border-radius:18px;padding:8px 20px;font-size:14px}
+.md h3{font-size:1.15em;margin:4px 0 6px}
+.md h4{font-size:.95em;color:var(--blue);margin:10px 0 3px}
+.md p{margin:0 0 6px;line-height:1.6}
+.md ol,.md ul{margin:0 0 6px;padding-left:20px;line-height:1.6}
+.flash{min-height:46vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;user-select:none;background:#fff;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.1);padding:20px}
+.flash .big{font-size:2.1em;font-weight:600}
+.flash .hint{font-size:12px;color:#999;margin-top:14px}
+.empty,.loading{text-align:center;color:#888;padding:40px 0}
+.gear{position:fixed;right:14px;bottom:calc(16px + env(safe-area-inset-bottom));width:46px;height:46px;border-radius:50%;border:none;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.2);font-size:18px;z-index:150}
+.mask{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:350}
+.sheet{position:fixed;left:0;right:0;bottom:0;max-height:86vh;overflow:auto;background:#f5f5f7;border-radius:14px 14px 0 0;z-index:360;padding:0 12px calc(20px + env(safe-area-inset-bottom))}
+.sheet-head{position:sticky;top:0;background:#f5f5f7;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 2px 8px}
+.sheet-head .x{border:none;background:#e0e0e0;border-radius:50%;width:30px;height:30px;flex-shrink:0}
+.set{background:#fff;border-radius:10px;padding:4px 14px;margin-bottom:12px}
+.set-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #f0f0f0;font-size:15px}
+.set-row:last-child{border-bottom:none}
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;z-index:400}
+.lightbox img{max-width:96vw;max-height:86vh;background:#fff;border-radius:6px}
+</style>
+</head>
+<body>
+<div class="top" id="top">
+  <div class="tab-bar">
+    <button class="tab-btn" data-tab="verbal">填空</button>
+    <button class="tab-btn" data-tab="reading">阅读</button>
+    <button class="tab-btn" data-tab="math">数学</button>
+    <button class="tab-btn" data-tab="words">单词</button>
+  </div>
+  <div class="subbar" id="subbar"></div>
+</div>
+<div class="home" id="home"></div>
+<button class="gear" id="gear" title="设置">⚙</button>
+<script>
+'use strict';
+const TODAY_PLAN = {"2026-10-16":[["math_single",1],["math_single",2],["math_compare",1],["math_compare",2],["fill_six_two",1],["fill_single",1],["fill_single",2],["reading_short",1],["reading_medium",1],["bb_six_two",1],["bb_words",1],["bb_words",2],["bb_words",3]],"2026-10-17":[["math_single",3],["math_single",4],["math_compare",3],["math_compare",4],["fill_six_two",2],["fill_six_two",3],["fill_single",3],["reading_short",2],["reading_short",3],["bb_six_two",2],["bb_words",4],["bb_words",5],["bb_words",6]],"2026-10-18":[["math_single",5],["math_single",6],["math_compare",5],["math_fill",1],["fill_six_two",4],["fill_single",4],["fill_single",5],["reading_short",4],["reading_medium",2],["bb_six_two",3],["bb_words",7],["bb_words",8],["bb_words",9]],"2026-10-19":[["math_single",7],["math_compare",6],["math_multi",1],["math_chart",1],["fill_six_two",5],["fill_six_two",6],["fill_single",6],["reading_short",5],["reading_medium",3],["bb_six_two",4],["bb_words",10],["bb_words",11],["bb_words",12]],"2026-10-20":[["math_single",8],["math_single",9],["math_compare",7],["math_compare",8],["fill_six_two",7],["fill_single",7],["fill_single",8],["reading_short",6],["reading_short",7],["bb_six_two",5],["bb_words",13],["bb_words",14],["bb_words",15]],"2026-10-21":[["math_single",10],["math_compare",9],["math_compare",10],["math_fill",2],["fill_six_two",8],["fill_six_two",9],["fill_single",9],["reading_logic",1],["reading_medium",4],["bb_six_two",6],["bb_words",16],["bb_words",17],["bb_words",18]],"2026-10-22":[["math_single",11],["math_single",12],["math_compare",11],["math_compare",12],["fill_six_two",10],["fill_single",10],["fill_single",11],["reading_short",8],["reading_short",9],["bb_six_two",7],["bb_words",19],["bb_words",20],["bb_words",21]],"2026-10-23":[["math_single",13],["math_compare",13],["math_multi",2],["math_chart",2],["fill_six_two",11],["fill_single",12],["fill_single",13],["reading_short",10],["reading_medium",5],["bb_six_two",8],["bb_words",22],["bb_words",23],["bb_words",24]],"2026-10-24":[["math_single",14],["math_single",15],["math_compare",14],["math_fill",3],["fill_six_two",12],["fill_six_two",13],["fill_double",1],["reading_short",11],["reading_medium",6],["bb_six_two",9],["bb_words",25],["bb_words",26],["bb_words",27]],"2026-10-25":[["math_single",16],["math_single",17],["math_compare",15],["math_compare",16],["fill_six_two",14],["fill_double",2],["fill_double",3],["reading_short",12],["reading_short",13],["bb_six_two",10],["bb_words",28],["bb_words",29],["bb_words",30]],"2026-10-26":[["math_single",18],["math_single",19],["math_compare",17],["math_compare",18],["fill_six_two",15],["fill_six_two",16],["fill_double",4],["reading_short",14],["reading_medium",7],["bb_six_two",11],["bb_words",31],["bb_words",32],["bb_words",33]],"2026-10-27":[["math_single",20],["math_fill",4],["fill_double",5],["reading_logic",2]],"2026-10-29":[["math_single",21],["math_single",22],["math_compare",19],["math_compare",20],["math_compare",21],["math_multi",3],["math_chart",3],["fill_six_two",17],["fill_six_two",18],["fill_six_two",19],["fill_double",6],["fill_double",7],["reading_short",15],["reading_medium",8],["bb_six_two",12],["bb_six_two",13],["bb_words",34],["bb_words",35],["bb_words",36],["bb_words",37],["bb_words",38],["bb_words",39]],"2026-10-30":[["math_single",23],["math_single",24],["math_single",25],["math_compare",22],["math_compare",23],["math_fill",5],["fill_six_two",20],["fill_six_two",21],["fill_double",8],["fill_double",9],["fill_double",10],["reading_short",16],["reading_short",17],["bb_six_two",14],["bb_six_two",15],["bb_words",40],["bb_words",41],["bb_words",42],["bb_words",43],["bb_words",44],["bb_words",45]],"2026-10-31":[["math_single",26],["math_single",27],["math_compare",24],["math_compare",25],["math_multi",4],["math_chart",4],["fill_six_two",22],["fill_six_two",23],["fill_double",11],["fill_double",12],["fill_triple",1],["reading_short",18],["reading_medium",9],["bb_six_two",16],["bb_six_two",17],["bb_words",46],["bb_words",47],["bb_words",48],["bb_words",49],["bb_words",50],["bb_words",51]],"2026-11-01":[["math_single",28],["math_single",29],["math_compare",26],["math_compare",27],["math_compare",28],["math_fill",6],["fill_six_two",24],["fill_six_two",25],["fill_six_two",26],["fill_triple",2],["fill_triple",3],["reading_short",19],["reading_medium",10],["bb_six_two",18],["bb_six_two",19],["bb_words",52],["bb_words",53],["bb_words",54],["bb_words",55],["bb_words",56],["bb_words",57]],"2026-11-02":[["math_single",30],["math_single",31],["math_single",32],["math_compare",29],["math_compare",30],["math_compare",31],["fill_six_two",27],["fill_six_two",28],["fill_triple",4],["fill_triple",5],["fill_triple",6],["reading_short",20],["reading_short",21],["bb_six_two",20],["bb_six_two",21],["bb_words",58],["bb_words",59],["bb_words",60],["bb_words",61],["bb_words",62],["bb_words",63]],"2026-11-03":[["math_single",33],["math_single",34],["math_compare",32],["math_multi",5],["math_fill",7],["math_chart",5],["fill_six_two",29],["fill_six_two",30],["fill_triple",7],["fill_triple",8],["reading_logic",3],["reading_medium",11],["bb_six_two",22],["bb_six_two",23],["bb_words",64],["bb_words",65],["bb_words",66],["bb_words",67],["bb_words",68],["bb_words",69]]};
+const KEY = 'gre_app_v1';
+const $ = s => document.querySelector(s);
+const LET = 'ABCDEFGHIJ';
+function el(tag, props, kids) {
+  const e = document.createElement(tag);
+  if (props) for (const [k, v] of Object.entries(props)) {
+    if (k === 'class') e.className = v; else if (k === 'text') e.textContent = v; else if (k === 'html') e.innerHTML = v;
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), v); else if (v !== undefined && v !== null && v !== false) e.setAttribute(k, v);
+  }
+  (kids || []).forEach(c => c != null && c !== false && e.append(c));
+  return e;
+}
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+// ---------- state ----------
+let S = {};
+try { S = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { S = {}; }
+let saveTimer = null;
+function save() { clearTimeout(saveTimer); saveTimer = setTimeout(flush, 200); }
+function flush() { clearTimeout(saveTimer); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { alert('保存失败：' + e.message); } }
+addEventListener('pagehide', flush);
+document.addEventListener('visibilitychange', () => { if (document.hidden) flush(); });
+const pref = (k, d) => S['pref_' + k] ?? d;
+function setPref(k, v) { S['pref_' + k] = v; save(); }
+function applyFont() { document.documentElement.style.setProperty('--fs', pref('fs', 16) + 'px'); }
+applyFont();
+const peek = k => S['r|' + k];
+const R = k => S['r|' + k] || (S['r|' + k] = {});
+const W = id => S['w|' + id] || {};
+function setW(id, patch) { const r = { ...W(id), ...patch }; Object.keys(r).forEach(k => { if (!r[k]) delete r[k]; }); if (Object.keys(r).length) S['w|' + id] = r; else delete S['w|' + id]; save(); }
+
+// ---------- data ----------
+const SECTIONS = {
+  verbal: [['fill_single', '单空'], ['fill_double', '双空'], ['fill_triple', '三空'], ['fill_six_two', '六选二']],
+  reading: [['reading_short', '短文章'], ['reading_medium', '中文章'], ['reading_logic', '逻辑单题']],
+  math: [['math_single', '单选'], ['math_compare', '比较'], ['math_multi', '多选'], ['math_fill', '填空'], ['math_chart', '图表']],
+  words: [['bb_words', '高频词3600'], ['bb_six_two', 'BB六选二'], ['flash', '生词闪卡'], ['words', '单词表']]
+};
+const BOOK = { fill_single: '单空', fill_double: '双空', fill_triple: '三空', fill_six_two: '六选二', reading_short: '短文章', reading_medium: '中文章', reading_logic: '逻辑',
+  math_single: '单选', math_compare: '比较', math_multi: '多选', math_fill: '填空', math_chart: '图表', bb_words: 'BB词', bb_six_two: 'BB六选二' };
+const KIND = { fill_single: 'verbal', fill_double: 'verbal', fill_triple: 'verbal', fill_six_two: 'verbal', reading_short: 'reading', reading_medium: 'reading', reading_logic: 'reading',
+  math_single: 'math', math_compare: 'math', math_multi: 'math', math_fill: 'math', math_chart: 'math', bb_words: 'drill', bb_six_two: 'drill' };
+const TAB_OF = {}; Object.entries(SECTIONS).forEach(([t, l]) => l.forEach(([s]) => { TAB_OF[s] = t; }));
+const DATA = {}, ITEMS = {}, loading = {};
+function load(name) {
+  if (DATA[name]) return Promise.resolve(DATA[name]);
+  return loading[name] || (loading[name] = fetch('data/' + name + '.json').then(r => { if (!r.ok) throw Error(r.status); return r.json(); }).then(d => {
+    if (name === 'words') d.byId = new Map(d.words.map(w => [w.id, w]));
+    DATA[name] = d;
+    if (KIND[name]) ITEMS[name] = flatten(name, d);
+    return d;
+  }).catch(e => { delete loading[name]; throw e; }));
+}
+// One practice item = one question. Reading questions carry their article.
+function flatten(sec, d) {
+  const kind = KIND[sec];
+  if (kind === 'reading') return d.flatMap(a => a.qs.map(q => ({ key: q.k, book: a.book, q, art: a })));
+  return d.map(q => ({ key: kind === 'math' ? q.id : q.k, book: q.book, q }));
+}
+const canon = id => (DATA.words && DATA.words.idMap[id]) || id;
+const wordOf = id => DATA.words && DATA.words.byId.get(canon(id));
+const books = sec => [...new Set(ITEMS[sec].map(i => i.book))];
+const bookItems = (sec, b) => ITEMS[sec].filter(i => i.book === b);
+function progress(items) {
+  let done = 0, wrong = 0;
+  items.forEach(i => { const r = peek(i.key); if (r && r.ck) { done++; if (!r.ok) wrong++; } });
+  return { done, wrong, total: items.length };
+}
+const isWrong = i => { const r = peek(i.key); return r && r.ck && r.ok === false; };
+const isFav = i => !!S['f|' + i.key] || (KIND[i.sec] === 'drill' && i.q.sw && W(canon(i.q.sw)).star);
+const todayKey = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+
+let tab = pref('tab', 'verbal');
+if (!SECTIONS[tab]) tab = 'verbal';
+const curSec = () => (SECTIONS[tab].find(([s]) => s === pref('sec_' + tab)) || SECTIONS[tab][0])[0];
+
+// ---------- home ----------
+async function renderHome() {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  const seg = el('div', { class: 'seg' });
+  SECTIONS[tab].forEach(([s, n]) => seg.append(el('button', { class: s === curSec() ? 'on' : '', text: n, onclick: () => { setPref('sec_' + tab, s); renderHome(); } })));
+  $('#subbar').replaceChildren(seg);
+  const home = $('#home'), sec = curSec();
+  home.replaceChildren(el('div', { class: 'loading', text: '正在加载…' }));
+  try { await load(sec === 'flash' ? 'words' : sec); } catch (e) { home.replaceChildren(el('div', { class: 'empty', text: '加载失败，请检查网络后重试。' })); return; }
+  if (sec !== curSec()) return;
+  if (sec === 'words') return renderWords(home);
+  if (sec === 'flash') return renderFlash(home);
+  const kids = [];
+  const today = await todayCard();
+  if (today) kids.push(today);
+  const items = ITEMS[sec], p = progress(items), todaySet = new Set((TODAY_PLAN[todayKey()] || []).filter(([s]) => s === sec).map(([, b]) => b));
+  kids.push(el('div', { class: 'sec-h' }, [el('span', { text: SECTIONS[tab].find(([s]) => s === sec)[1] + ' · ' + books(sec).length + ' 组' }), el('small', { text: '已做 ' + p.done + ' / ' + p.total + ' · 错 ' + p.wrong })]));
+  const grid = el('div', { class: 'grid' });
+  books(sec).forEach(b => {
+    const its = bookItems(sec, b), q = progress(its), pct = Math.round(q.done / q.total * 100);
+    grid.append(el('button', { class: 'tile' + (q.done === q.total ? ' done' : '') + (todaySet.has(b) ? ' today' : ''), onclick: () => startBook(sec, b) }, [
+      el('b', { text: BOOK[sec] + b }), el('small', { text: q.done === 0 ? its.length + ' 题' : q.done === q.total ? '✓ ' + (q.total - q.wrong) + '/' + q.total : q.done + '/' + q.total + (q.wrong ? ' · 错' + q.wrong : '') }),
+      el('span', { class: 'bar' }, [el('i', { style: 'width:' + pct + '%' })])]));
+  });
+  kids.push(grid);
+  const wrongs = items.filter(isWrong), favs = items.map(i => ({ ...i, sec })).filter(isFav);
+  kids.push(el('div', { class: 'sec-h' }, [el('span', { text: '复习' })]), el('div', { class: 'rowbtns' }, [
+    el('button', { class: 'bigbtn', onclick: () => wrongs.length && startSet({ sec, title: BOOK[sec] + ' 错题本', items: wrongs }) }, [el('b', { text: '✗ 错题本' }), el('small', { text: wrongs.length + ' 题' })]),
+    el('button', { class: 'bigbtn', onclick: () => favs.length && startSet({ sec, title: BOOK[sec] + ' 收藏', items: favs }) }, [el('b', { text: '☆ 收藏' }), el('small', { text: favs.length + ' 题' })])]));
+  home.replaceChildren(...kids);
+}
+async function todayCard() {
+  const plan = TODAY_PLAN[todayKey()];
+  if (!plan || !plan.length) return null;
+  const card = el('div', { class: 'today' });
+  const secs = [...new Set(plan.map(([s]) => s))];
+  await Promise.all(secs.map(s => load(s).catch(() => {})));
+  const chips = el('div', { class: 'chips' });
+  let all = 0, done = 0;
+  plan.forEach(([s, b]) => {
+    if (!ITEMS[s]) return;
+    const p = progress(bookItems(s, b)); all += p.total; done += p.done;
+    chips.append(el('button', { class: 'tchip' + (p.done === p.total ? ' done' : p.done ? ' part' : ''), onclick: () => startBook(s, b) },
+      [document.createTextNode(BOOK[s] + b + (p.done === p.total ? ' ✓' : p.done ? ' ' + p.done + '/' + p.total : ''))]));
+  });
+  const next = plan.find(([s, b]) => ITEMS[s] && progress(bookItems(s, b)).done < bookItems(s, b).length);
+  card.append(el('div', { class: 'today-h' }, [el('b', { text: '今天的任务' }), el('span', { text: done + ' / ' + all + ' 题' })]), chips);
+  if (next) card.append(el('div', { style: 'margin-top:10px' }, [el('button', { class: 'tchip', style: 'background:var(--blue);color:#fff;border-color:var(--blue)', text: '▶ 继续：' + BOOK[next[0]] + next[1], onclick: () => startBook(next[0], next[1]) })]));
+  return card;
+}
+
+// ---------- practice ----------
+let P = null;   // { sec, title, items, i, book? }
+function startBook(sec, b) {
+  const items = bookItems(sec, b);
+  const pos = S['pos|' + sec + '|' + b] || 0;
+  const firstUndone = items.findIndex(i => !(peek(i.key) && peek(i.key).ck));
+  startSet({ sec, book: b, title: BOOK[sec] + b, items }, firstUndone < 0 ? Math.min(pos, items.length - 1) : Math.max(0, Math.min(pos, firstUndone)));
+}
+function startSet(set, at) {
+  P = { ...set, items: set.items.map(i => ({ ...i, sec: set.sec })), i: at || 0, summary: false };
+  if (!$('#prac')) {
+    document.body.append(el('div', { class: 'prac', id: 'prac' }, [
+      el('div', { class: 'p-top' }, [el('button', { class: 'back', text: '‹', onclick: () => history.back() }), el('div', { class: 't', id: 'pTitle' }), el('span', { id: 'pStar' })]),
+      el('div', { class: 'prog' }, [el('i', { id: 'pProg' })]),
+      el('div', { class: 'p-body', id: 'pBody' }),
+      el('div', { class: 'p-foot', id: 'pFoot' })]));
+    history.pushState({ prac: 1 }, '');
+    swipe($('#pBody'));
+  }
+  drawQ();
+}
+function closePractice() { const p = $('#prac'); if (p) p.remove(); P = null; flush(); renderHome(); }
+addEventListener('popstate', () => {
+  if (ignorePop) { ignorePop = false; return; }
+  if (sheetOpen) { sheetOpen.mask.remove(); sheetOpen.sheet.remove(); sheetOpen = null; return; }
+  if ($('#prac')) closePractice();
+});
+function swipe(node) {
+  let x0 = null, y0 = null;
+  node.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+  node.addEventListener('touchend', e => {
+    if (x0 === null || !P) return;
+    const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; x0 = null;
+    if (Math.abs(dx) < 70 || Math.abs(dx) < 2 * Math.abs(dy) || (getSelection() + '')) return;
+    if (e.target.closest('.mathwrap,.opt .c,.qa,.passage')) { const sc = e.target.closest('.mathwrap,.opt .c,.qa'); if (sc && sc.scrollWidth > sc.clientWidth) return; }
+    move(dx < 0 ? 1 : -1);
+  });
+}
+function move(d) {
+  if (!P) return;
+  if (P.summary) { if (d < 0) { P.summary = false; drawQ(); } return; }
+  const n = P.i + d;
+  if (n < 0) return;
+  if (n >= P.items.length) return showSummary();
+  P.i = n; drawQ();
+}
+function drawQ() {
+  const it = P.items[P.i], kind = KIND[P.sec];
+  if (P.book) S['pos|' + P.sec + '|' + P.book] = P.i;
+  $('#pTitle').replaceChildren(el('b', { text: P.title }), el('small', { text: (P.i + 1) + ' / ' + P.items.length + (P.book ? '' : ' · ' + BOOK[P.sec] + it.book) }));
+  $('#pProg').style.width = ((P.i + 1) / P.items.length * 100) + '%';
+  const body = $('#pBody');
+  const ctl = QUESTION[kind](it, () => { foot(); });
+  body.replaceChildren(ctl.el); body.scrollTop = 0;
+  zoomImages(body);
+  $('#pStar').replaceChildren(kind === 'drill' && it.q.sw ? wordStar(canon(it.q.sw)) : starBtn('f|' + it.key));
+  P.ctl = ctl; foot();
+}
+function foot() {
+  const f = $('#pFoot'), ctl = P.ctl, last = P.i === P.items.length - 1;
+  const prev = el('button', { class: 'nav', text: '‹ 上一题', disabled: P.i === 0, onclick: () => move(-1) });
+  let main;
+  if (!ctl.done()) {
+    main = el('button', { class: 'main', text: ctl.instant ? '选一个答案' : '检查', disabled: ctl.instant || !ctl.ready(), onclick: () => { ctl.check(); foot(); } });
+  } else main = el('button', { class: 'main', text: last ? '看小结' : '下一题 ›', onclick: () => move(1) });
+  const skip = el('button', { class: 'nav', text: last ? '小结' : '跳过 ›', onclick: () => move(1) });
+  f.replaceChildren(...[prev, main, ctl.done() ? null : skip].filter(Boolean));
+}
+// Called by a question once it's graded; optionally advance after a beat.
+function graded(ok) {
+  save(); foot();
+  if (ok && pref('auto', true) && P && P.ctl.instant) { const at = P.i, set = P; setTimeout(() => { if (P === set && P.i === at && !P.summary) move(1); }, 900); }
+}
+function showSummary() {
+  P.summary = true;
+  const its = P.items, p = progress(its), right = p.done - p.wrong;
+  $('#pTitle').replaceChildren(el('b', { text: P.title }), el('small', { text: '小结' }));
+  $('#pProg').style.width = '100%'; $('#pStar').replaceChildren();
+  const wrongIdx = its.map((it, k) => isWrong(it) ? k : -1).filter(k => k >= 0);
+  const undone = its.map((it, k) => !(peek(it.key) && peek(it.key).ck) ? k : -1).filter(k => k >= 0);
+  const acts = el('div', { class: 'acts' });
+  if (wrongIdx.length) acts.append(el('button', { class: 'primary', text: '重做这 ' + wrongIdx.length + ' 道错题', onclick: () => {
+    wrongIdx.forEach(k => delete S['r|' + its[k].key]); save();
+    startSet({ sec: P.sec, title: P.title + ' · 错题', items: wrongIdx.map(k => its[k]) }, 0);
+  } }));
+  if (undone.length) acts.append(el('button', { text: '还有 ' + undone.length + ' 题没做，去做', onclick: () => { P.summary = false; P.i = undone[0]; drawQ(); } }));
+  if (P.book) {
+    const bs = books(P.sec), nb = bs[bs.indexOf(P.book) + 1];
+    if (nb) acts.append(el('button', { class: wrongIdx.length ? '' : 'primary', text: '下一组：' + BOOK[P.sec] + nb + ' ›', onclick: () => startBook(P.sec, nb) }));
+  }
+  acts.append(el('button', { text: '全部重做', onclick: () => { if (!confirm('清空这组的作答记录，重新做？')) return; its.forEach(it => delete S['r|' + it.key]); save(); P.summary = false; P.i = 0; drawQ(); } }),
+    el('button', { text: '返回', onclick: () => history.back() }));
+  $('#pBody').replaceChildren(el('div', { class: 'sum' }, [
+    el('div', { class: 'score', text: right + ' / ' + its.length }), el('div', { class: 'sub', text: p.done < its.length ? '做了 ' + p.done + ' 题，对 ' + right + ' 题' : (p.wrong ? '错了 ' + p.wrong + ' 题，点题号回去看' : '全对 🎉') }),
+    wrongIdx.length ? el('div', { class: 'wrongs' }, wrongIdx.map(k => el('button', { text: k + 1, onclick: () => { P.summary = false; P.i = k; drawQ(); } }))) : null, acts]));
+  $('#pFoot').replaceChildren(el('button', { class: 'nav', style: 'flex:1', text: '‹ 回到最后一题', onclick: () => move(-1) }));
+}
+
+// ---------- question renderers ----------
+// Each returns { el, instant, ready(), done(), check() }. Instant types grade on tap.
+function optBtn(letter, content, cls, onclick) { return el('button', { class: 'opt' + cls, onclick }, [el('span', { class: 'l', text: letter }), content]); }
+function stateCls(rec, chosen, right) { return rec.ck ? (right ? ' ok' : chosen ? ' bad' : '') : chosen ? ' sel' : ''; }
+function verdict(ok) { return el('div', { class: 'verdict ' + (ok ? 'ok' : 'bad'), text: ok ? '✓ 正确' : '✗ 错误' }); }
+const QUESTION = {
+  verbal(it, refresh) {
+    const q = it.q, multi = q.mode === 'multi', single = !multi && q.groups.length === 1 && pref('instant', true);
+    const box = el('div');
+    const ctl = { el: box, instant: single, ready: () => { const s = (peek(q.k) || {}).sel || []; return multi ? s.length === q.ans.length : s.length === q.groups.length && s.every(v => v != null); },
+      done: () => !!(peek(q.k) || {}).ck, check() { const x = R(q.k), s = x.sel || []; x.ck = true; x.ok = multi ? s.join() === q.ans.slice().sort((a, b) => a - b).join() : s.every((v, i) => v === q.ans[i]); draw(); graded(x.ok); } };
+    function draw() {
+      const rec = peek(q.k) || {}, sel = rec.sel || [];
+      const kids = [el('div', { class: 'qmeta', text: '第 ' + q.n + ' 题' + (multi ? ' · 选 ' + q.ans.length + ' 个' : '') }), el('div', { class: 'stem', text: q.stem })];
+      q.groups.forEach((g, gi) => {
+        if (q.groups.length > 1) kids.push(el('div', { class: 'group-t', text: '空格 (' + 'i'.repeat(gi + 1) + ')' }));
+        kids.push(el('div', { class: 'opts' }, g.map((o, oi) => {
+          const chosen = multi ? sel.includes(oi) : sel[gi] === oi, right = multi ? q.ans.includes(oi) : q.ans[gi] === oi;
+          return optBtn(LET[oi], el('span', { class: 'c' }, [document.createTextNode(o.t), rec.ck && o.cn ? el('span', { class: 'cn', text: o.cn }) : null]), stateCls(rec, chosen, right), () => {
+            if (rec.ck) return; const x = R(q.k);
+            if (multi) { const s = (x.sel || []).slice(), p = s.indexOf(oi); if (p >= 0) s.splice(p, 1); else if (s.length < q.ans.length) s.push(oi); x.sel = s.sort((a, b) => a - b); }
+            else { x.sel = (x.sel || q.groups.map(() => null)).slice(); x.sel[gi] = oi; }
+            save();
+            if (single) return ctl.check();
+            draw(); refresh();
+          });
+        })));
+      });
+      if (rec.ck) {
+        kids.push(verdict(rec.ok), el('div', { class: 'why' }, [el('div', { html: '<b>答案：' + esc(q.label) + '</b>' }), q.zh ? el('div', { text: q.zh }) : null, q.why ? el('div', { text: q.why, style: 'margin-top:6px' }) : null]));
+        const chips = el('div'); kids.push(chips); wordChips(q.groups.flat().map(o => o.w).filter(Boolean).concat(q.orel, q.rel), chips);
+      }
+      box.replaceChildren(...kids);
+    }
+    draw(); return ctl;
+  },
+  reading(it, refresh) {
+    const q = it.q, a = it.art, multi = q.mode === 'multi', instant = !multi && pref('instant', true);
+    const box = el('div'), passage = el('div', { class: 'passage', html: a.html });
+    const zh = el('div', { class: 'why', hidden: true, text: a.zh });
+    const tools = el('div', { class: 'ptools' }, [el('button', { class: 'mini', text: '展开全文', onclick: e => { passage.classList.toggle('full'); e.target.textContent = passage.classList.contains('full') ? '收起' : '展开全文'; } }),
+      a.zh ? el('button', { class: 'mini', text: '全文翻译', onclick: () => { zh.hidden = !zh.hidden; } }) : null,
+      el('span', { class: 'qmeta', style: 'margin:4px 0 0 auto', text: '本文 ' + a.qs.length + ' 题 · 第 ' + (a.qs.indexOf(q) + 1) + ' 题' })]);
+    const qbox = el('div');
+    const ctl = { el: el('div', {}, [passage, tools, zh, qbox]), instant, ready: () => ((peek(q.k) || {}).sel || []).length > 0, done: () => !!(peek(q.k) || {}).ck,
+      check() { const x = R(q.k); x.ck = true; x.ok = (x.sel || []).join() === q.ans.slice().sort((m, n) => m - n).join(); draw(); graded(x.ok); } };
+    function draw() {
+      const rec = peek(q.k) || {}, sel = rec.sel || [];
+      const type = q.sentence ? '选句题：选出原文中的一句' : multi ? '多选题：选出所有正确选项' : '';
+      const kids = [type ? el('div', { class: 'qmeta', text: type }) : null, el('div', { class: 'stem', html: q.stem })];
+      kids.push(el('div', { class: 'opts' }, q.opts.map((o, oi) => optBtn(LET[oi], el('span', { class: 'c' }, [el('span', { html: o.h || esc(o.t) }), rec.ck && o.cn ? el('span', { class: 'cn', text: o.cn }) : null]),
+        stateCls(rec, sel.includes(oi), q.ans.includes(oi)), () => {
+          if (rec.ck) return; const x = R(q.k), s = (x.sel || []).slice();
+          if (multi) { const p = s.indexOf(oi); if (p >= 0) s.splice(p, 1); else s.push(oi); x.sel = s.sort((m, n) => m - n); } else x.sel = [oi];
+          save(); if (q.sentence) highlightSentence(passage, a, o.t);
+          if (instant) return ctl.check();
+          draw(); refresh();
+        }))));
+      if (rec.ck) {
+        kids.push(verdict(rec.ok), el('div', { class: 'why html' }, [el('div', { html: '<b>答案：' + esc(q.label) + '</b>' }), q.zh ? el('div', { text: q.zh }) : null, q.why ? el('div', { html: q.why, style: 'margin-top:6px' }) : null]));
+        const chips = el('div'); kids.push(chips); wordChips(q.opts.map(o => o.w).filter(Boolean).concat(q.orel, q.rel), chips);
+      }
+      qbox.replaceChildren(...kids.filter(Boolean));
+    }
+    draw(); return ctl;
+  },
+  math(it, refresh) {
+    const q = it.q, instant = !q.multi && !q.fill && pref('instant', true);
+    const box = el('div');
+    let inp = null;
+    const ctl = { el: box, instant, ready: () => q.fill ? !!String((peek(q.id) || {}).text || '').trim() : ((peek(q.id) || {}).sel || []).length > 0, done: () => !!(peek(q.id) || {}).ck,
+      check() {
+        const x = R(q.id);
+        if (q.fill) {
+          const a = numeric(x.text || ''), b = numeric(q.text + (q.text2 ? '/' + q.text2 : ''));
+          if (!Number.isFinite(a)) { alert('请输入数字或分数，如 3、0.5、1/2'); return; }
+          x.ok = Number.isFinite(b) && Math.abs(a - b) <= 1e-9 * Math.max(1, Math.abs(b));
+        } else x.ok = (x.sel || []).length === q.correct.length && q.correct.every(i => x.sel.includes(i));
+        x.ck = true; draw(); graded(x.ok);
+      } };
+    function draw() {
+      const rec = peek(q.id) || {}, sel = rec.sel || [];
+      const kids = [el('div', { class: 'qmeta', text: '第 ' + q.n + ' 题' + (q.multi ? ' · 多选（选出所有正确项）' : '') + (q.diff ? ' · 难度 ' + q.diff : '') }),
+        el('div', { class: 'stem mathwrap', html: (q.html || '') + (q.inq || '') })];
+      if (q.qa) kids.push(el('div', { class: 'qa' }, q.qa.map((h, i) => el('div', {}, [el('div', { class: 'lab', text: 'Quantity ' + 'AB'[i] }), el('div', { html: h })]))));
+      if (q.fill) {
+        inp = el('input', { inputmode: 'decimal', placeholder: '数字或分数，如 1/2', value: rec.text || '', class: rec.ck ? (rec.ok ? 'ok' : 'bad') : '', readonly: rec.ck ? 'readonly' : null });
+        inp.addEventListener('input', () => { R(q.id).text = inp.value; save(); refresh(); });
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter' && ctl.ready() && !ctl.done()) { ctl.check(); } });
+        kids.push(el('div', { class: 'fill-row' }, [q.pre ? el('span', { text: q.pre }) : null, inp, q.suf ? el('span', { text: q.suf }) : null]));
+      } else kids.push(el('div', { class: 'opts' }, (q.opts || []).map((o, oi) => optBtn(LET[oi] + '.', el('span', { class: 'c', html: o }), stateCls(rec, sel.includes(oi), q.correct.includes(oi)), () => {
+        if (rec.ck) return; const x = R(q.id), s = (x.sel || []).slice();
+        if (q.multi) { const p = s.indexOf(oi); if (p >= 0) s.splice(p, 1); else s.push(oi); x.sel = s.sort((m, n) => m - n); } else x.sel = [oi];
+        save(); if (instant) return ctl.check();
+        draw(); refresh();
+      }))));
+      if (rec.ck) {
+        const ans = mathAnswer(q);
+        kids.push(verdict(rec.ok), el('div', { class: 'why html' }, [el('p', { html: '<b>答案：' + esc(ans) + '</b>' + (q.desc && q.desc !== ans ? '　' + q.desc : '') }),
+          ...(q.zh || []).map(t => el('p', { class: 'zh', html: t })), el('div', { class: 'mathwrap', html: q.why || '原题未提供解析。' }),
+          q.kn && q.kn.length ? el('p', { class: 'zh', text: '知识点：' + q.kn.join(' · ') }) : null]));
+      } else if (q.zh && q.zh.length) {
+        const zh = el('div', { class: 'why html', hidden: true }, q.zh.map(t => el('p', { html: t })));
+        kids.push(el('div', { style: 'margin-top:12px' }, [el('button', { class: 'mini', text: '题目翻译', onclick: () => { zh.hidden = !zh.hidden; } })]), zh);
+      }
+      box.replaceChildren(...kids); zoomImages(box);
+    }
+    draw(); return ctl;
+  },
+  drill(it, refresh) {
+    const q = it.q, sw = q.sw && canon(q.sw), box = el('div');
+    const ctl = { el: box, instant: true, ready: () => false, done: () => !!(peek(q.k) || {}).ck, check() {} };
+    function grade(oi) {
+      const x = R(q.k); x.sel = oi; x.ck = true; x.ok = oi >= 0 && q.ans.includes(oi);
+      if (!x.ok && sw) setW(sw, { star: true, known: false });
+      draw(); graded(x.ok);
+      $('#pStar').replaceChildren(sw ? wordStar(sw) : starBtn('f|' + q.k));
+    }
+    function draw() {
+      const rec = peek(q.k) || {};
+      const kids = [el('div', { class: 'drill-stem', text: q.stem }),
+        el('div', { class: 'opts' }, q.opts.map((o, oi) => optBtn(LET[oi], el('span', { class: 'c' }, [document.createTextNode(o.t), rec.ck && o.cn ? el('span', { class: 'cn', text: o.cn }) : null]),
+          stateCls(rec, rec.sel === oi, q.ans.includes(oi)), () => { if (!rec.ck) grade(oi); })))];
+      if (!rec.ck) kids.push(el('div', { class: 'drill-actions' }, [el('button', { text: '不认识', onclick: () => grade(-1) }), el('button', { text: '模糊', onclick: () => grade(-1) })]));
+      else {
+        kids.push(el('div', { style: 'display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px' }, [verdict(rec.ok),
+          sw ? el('button', { class: 'kbtn' + (W(sw).known ? ' on' : ''), text: '✓ 认识这个词', onclick: () => { setW(sw, { known: !W(sw).known, star: W(sw).known ? W(sw).star : false }); draw(); $('#pStar').replaceChildren(wordStar(sw)); } }) : null,
+          sw ? el('button', { class: 'mini', text: '单词详情', onclick: () => wordSheet(sw) }) : null]));
+        if (!rec.ok && sw) kids.push(el('div', { class: 'label-s', text: '已自动收藏到生词本。' }));
+        const chips = el('div'); kids.push(chips); wordChips(q.opts.map(o => o.w).filter(Boolean).concat(q.rel), chips);
+      }
+      box.replaceChildren(...kids);
+    }
+    draw(); return ctl;
+  }
+};
+function numeric(raw) {
+  const s = String(raw).trim().replace(/−/g, '-');
+  if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:\s*\/\s*[+-]?(?:\d+(?:\.\d*)?|\.\d+))?$/.test(s)) return NaN;
+  const n = s.split('/').map(Number); return n.length === 2 ? (n[1] === 0 ? NaN : n[0] / n[1]) : n[0];
+}
+const mathAnswer = q => q.fill ? (q.text + (q.text2 ? ' / ' + q.text2 : '')) : q.correct.map(i => LET[i]).join('、');
+function highlightSentence(passage, a, text) {
+  passage.innerHTML = a.html;
+  const pattern = String(text || '').trim().split(/\s+/).map(s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('\\s+');
+  if (!pattern) return;
+  const m = new RegExp(pattern).exec(passage.textContent); if (!m) return;
+  const walker = document.createTreeWalker(passage, NodeFilter.SHOW_TEXT); let node, off = 0, start = null, end = null;
+  while ((node = walker.nextNode())) { const next = off + node.length; if (!start && m.index < next) start = [node, m.index - off]; if (start && m.index + m[0].length <= next) { end = [node, m.index + m[0].length - off]; break; } off = next; }
+  if (start && end) { const rg = document.createRange(); rg.setStart(...start); rg.setEnd(...end); const mk = el('mark', { class: 'reading-sentence' }); mk.append(rg.extractContents()); rg.insertNode(mk); mk.scrollIntoView({ block: 'nearest' }); }
+}
+
+// ---------- words ----------
+function starBtn(key) {
+  const b = el('button', { class: 'star', title: '收藏' });
+  const paint = () => { b.textContent = S[key] ? '★' : '☆'; b.classList.toggle('on', !!S[key]); };
+  b.onclick = e => { e.stopPropagation(); if (S[key]) delete S[key]; else S[key] = true; paint(); save(); };
+  paint(); return b;
+}
+function wordStar(id) {
+  const b = el('button', { class: 'star', title: '收藏单词' });
+  const paint = () => { b.textContent = W(id).star ? '★' : '☆'; b.classList.toggle('on', !!W(id).star); };
+  b.onclick = e => { e.stopPropagation(); setW(id, { star: !W(id).star }); paint(); };
+  paint(); return b;
+}
+async function wordChips(ids, holder) {
+  await load('words');
+  const seen = new Set(), list = [];
+  ids.forEach(id => { const w = wordOf(id); if (w && !seen.has(w.id)) { seen.add(w.id); list.push(w); } });
+  if (!list.length) return;
+  holder.replaceChildren(el('div', { class: 'label-s', text: '相关单词：☆ 收藏进生词本，点词看详情' }), el('div', { class: 'wchips' }, list.map(w =>
+    el('span', { class: 'chip' + (W(w.id).known ? ' known' : '') }, [wordStar(w.id), el('button', { class: 'wl', text: w.en, onclick: () => wordSheet(w.id) })]))));
+}
+function md(text) {
+  const box = el('div', { class: 'md' });
+  let list = null;
+  const inline = s => esc(s).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
+  String(text || '').replace(/\r/g, '').split('\n').forEach(line => {
+    let m;
+    if (!line.trim()) { list = null; return; }
+    if ((m = line.match(/^(#{1,6})\s+(.*)$/))) { list = null; box.append(el(m[1].length <= 3 ? 'h3' : 'h4', { html: inline(m[2]) })); return; }
+    if (/^\s*(-{3,}|\*{3,})\s*$/.test(line)) { list = null; return; }
+    if ((m = line.match(/^\s*(\d+\.|[-*])\s+(.*)$/))) { if (!list) { list = el(/\d/.test(m[1]) ? 'ol' : 'ul'); box.append(list); } list.append(el('li', { html: inline(m[2]) })); return; }
+    if (list && /^\s{2,}/.test(line)) { list.lastChild.append(el('div', { class: 'zh', html: inline(line.trim()) })); return; }
+    list = null; box.append(el('p', { html: inline(line) }));
+  });
+  return box;
+}
+let sheetOpen = null, ignorePop = false;
+function openSheet(head, body) {
+  closeSheet(true);
+  const mask = el('div', { class: 'mask', onclick: () => closeSheet() });
+  const sheet = el('div', { class: 'sheet' }, [el('div', { class: 'sheet-head' }, [head, el('button', { class: 'x', text: '✕', onclick: () => closeSheet() })]), body]);
+  document.body.append(mask, sheet); sheetOpen = { mask, sheet }; history.pushState({ sheet: 1 }, '');
+}
+function closeSheet(replacing) {
+  if (!sheetOpen) return; sheetOpen.mask.remove(); sheetOpen.sheet.remove(); sheetOpen = null;
+  // Pop the sheet's history entry without letting popstate treat it as "leave practice".
+  if (!replacing && history.state && history.state.sheet) { ignorePop = true; history.back(); }
+}
+async function wordSheet(id) {
+  await load('words');
+  const w = wordOf(id); if (!w) return;
+  const known = el('button', { class: 'kbtn' + (W(w.id).known ? ' on' : ''), text: '✓ 认识', onclick: () => { setW(w.id, { known: !W(w.id).known }); known.classList.toggle('on', !!W(w.id).known); } });
+  const head = el('div', { style: 'display:flex;align-items:center;gap:8px;min-width:0' }, [wordStar(w.id), el('b', { text: w.en, style: 'font-size:1.2em' }), known]);
+  const body = el('div', { class: 'card' }, [w.ph && w.ph.length ? el('div', { class: 'zh', text: w.ph.join(' / ') }) : null, el('p', { text: (w.m || []).join('；') || '原始数据未提供中文释义' })]);
+  openSheet(head, body);
+  if (w.d && w.d.length) {
+    const ph = el('div', { class: 'loading', text: '加载详情…' }); body.append(ph);
+    try { for (const tid of w.d) { const b = await load('texts/' + Math.floor(tid / 400)); ph.before(md(b[tid])); } ph.remove(); } catch (e) { ph.textContent = '详情加载失败'; }
+  } else (w.ex || []).forEach(([en, zh]) => body.append(el('p', {}, [document.createTextNode(en), el('div', { class: 'zh', text: zh })])));
+  if (w.al && w.al.length) body.append(el('p', { class: 'zh', text: '题目中也出现为：' + w.al.join('、') }));
+  if (w.base) { const b = wordOf(w.base); if (b) body.append(el('p', {}, [el('span', { class: 'zh', text: '基础词 ' }), el('button', { class: 'mini', text: b.en, onclick: () => wordSheet(b.id) })])); }
+}
+function lightbox(src) { const b = el('div', { class: 'lightbox', onclick: () => b.remove() }, [el('img', { src })]); document.body.append(b); }
+function zoomImages(root) { root.querySelectorAll('img').forEach(img => { img.loading = 'lazy'; img.onclick = () => lightbox(img.src); }); }
+
+const WV = { filter: 'star', q: '', shown: 80, flash: 0, back: false, deck: null };
+function wordList() {
+  return DATA.words.words.filter(w => (WV.filter === 'all' || (WV.filter === 'star' ? W(w.id).star : WV.filter === 'known' ? W(w.id).known : !W(w.id).known))
+    && (!WV.q || w.en.toLowerCase().includes(WV.q) || (w.m || []).join('').includes(WV.q)));
+}
+function wordToolbar(redraw) {
+  const f = el('select', { onchange: () => { WV.filter = f.value; WV.shown = 80; WV.deck = null; WV.flash = 0; redraw(); } },
+    [['star', '生词本（收藏）'], ['all', '全部单词'], ['unknown', '未认识'], ['known', '已认识']].map(([v, n]) => el('option', { value: v, text: n, selected: WV.filter === v })));
+  const q = el('input', { type: 'search', placeholder: '搜索英文或中文', value: WV.q });
+  let t = null; q.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => { WV.q = q.value.trim().toLowerCase(); WV.shown = 80; WV.deck = null; WV.flash = 0; redraw(true); }, 300); });
+  return el('div', { class: 'toolbar' }, [f, q]);
+}
+function renderWords(home, keepBar) {
+  const list = wordList(), all = DATA.words.words;
+  const bar = keepBar && home.querySelector('.toolbar') || wordToolbar(k => renderWords(home, k));
+  const kids = [bar, el('div', { class: 'meta' }, [el('span', { text: list.length + ' 个' }), el('span', { text: '生词本 ' + all.filter(w => W(w.id).star).length + ' · 已认识 ' + all.filter(w => W(w.id).known).length + ' / ' + all.length })])];
+  if (!list.length) kids.push(el('p', { class: 'empty', text: WV.filter === 'star' ? '生词本还是空的。做题时点 ☆，或在高频词里点「不认识」，词就会到这里。' : '没有符合条件的单词。' }));
+  else {
+    const card = el('div', { class: 'card' });
+    list.slice(0, WV.shown).forEach(w => {
+      const row = el('div', { class: 'word-row' + (W(w.id).known ? ' known' : '') });
+      const k = el('button', { class: 'kbtn' + (W(w.id).known ? ' on' : ''), text: '✓', onclick: () => { setW(w.id, { known: !W(w.id).known }); k.classList.toggle('on', !!W(w.id).known); row.classList.toggle('known', !!W(w.id).known); } });
+      row.append(wordStar(w.id), el('span', { class: 'w', text: w.en, onclick: () => wordSheet(w.id) }), el('span', { class: 'm', text: (w.m || []).join('；'), onclick: () => wordSheet(w.id) }), k);
+      card.append(row);
+    });
+    kids.push(card);
+    if (list.length > WV.shown) kids.push(el('button', { class: 'more', text: '再显示 80 个（剩 ' + (list.length - WV.shown) + '）', onclick: () => { WV.shown += 80; renderWords(home, true); } }));
+  }
+  home.replaceChildren(...kids);
+}
+function renderFlash(home, keepBar) {
+  const list = wordList();
+  const bar = keepBar && home.querySelector('.toolbar') || wordToolbar(k => renderFlash(home, k));
+  const kids = [bar];
+  if (!list.length) { kids.push(el('p', { class: 'empty', text: '这组没有单词。先在做题时 ☆ 收藏一些词。' })); return home.replaceChildren(...kids); }
+  // The deck is a snapshot so marking a card never makes the next one jump.
+  if (!WV.deck) WV.deck = pref('flash_random', true) ? shuffle(list.map(w => w.id)) : list.map(w => w.id);
+  WV.flash = Math.max(0, Math.min(WV.flash, WV.deck.length - 1));
+  const w = wordOf(WV.deck[WV.flash]);
+  const face = el('div', { class: 'flash', onclick: () => { WV.back = !WV.back; renderFlash(home, true); } });
+  if (!WV.back) face.append(el('div', { class: 'big', text: w.en }), el('div', { class: 'hint', text: '点卡片看释义 · 左右滑切换' }));
+  else face.append(el('div', { class: 'big', style: 'font-size:1.35em', text: (w.m || []).join('；') }), el('div', { class: 'zh', text: w.en + (w.ph && w.ph.length ? '  ' + w.ph[0] : '') }),
+    ...(w.ex || []).slice(0, 2).map(([en, zh]) => el('p', { class: 'zh', style: 'text-align:left' }, [document.createTextNode(en), el('br'), document.createTextNode(zh)])));
+  const go = d => { WV.flash = Math.max(0, Math.min(WV.deck.length - 1, WV.flash + d)); WV.back = false; renderFlash(home, true); };
+  let x0 = null;
+  face.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+  face.addEventListener('touchend', e => { if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null; if (Math.abs(dx) > 60) { e.preventDefault(); go(dx < 0 ? 1 : -1); } });
+  kids.push(el('div', { class: 'meta', style: 'margin-top:4px' }, [el('span', { text: (WV.flash + 1) + ' / ' + WV.deck.length }), el('button', { class: 'mini', text: '详情', onclick: () => wordSheet(w.id) })]), face,
+    el('div', { class: 'drill-actions', style: 'margin-top:14px' }, [
+      el('button', { text: '✗ 还不熟', onclick: () => { setW(w.id, { star: true, known: false }); go(1); } }),
+      el('button', { style: 'background:var(--blue);color:#fff;border-color:var(--blue)', text: '✓ 认识了', onclick: () => { setW(w.id, { known: true, star: false }); go(1); } })]),
+    el('p', { class: 'meta', style: 'justify-content:center;margin-top:12px', text: '「认识了」移出生词本；「还不熟」留在生词本里。' }));
+  home.replaceChildren(...kids);
+}
+function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+// ---------- settings ----------
+function settings() {
+  const row = (label, ctl) => el('div', { class: 'set-row' }, [el('div', { text: label }), ctl]);
+  const seg = (vals, cur, on) => { const s = el('div', { class: 'seg' }); vals.forEach(([v, n]) => s.append(el('button', { class: String(v) === String(cur) ? 'on' : '', text: n, onclick: () => { on(v); s.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.textContent === n)); } }))); return s; };
+  openSheet(el('b', { text: '设置' }), el('div', {}, [el('div', { class: 'set' }, [
+    row('字号', seg([[14, '小'], [16, '中'], [18, '大'], [20, '特大']], pref('fs', 16), v => { setPref('fs', v); applyFont(); })),
+    row('单选题点选即判', seg([[true, '开'], [false, '关（点检查）']], pref('instant', true), v => setPref('instant', v))),
+    row('答对自动下一题', seg([[true, '开'], [false, '关']], pref('auto', true), v => setPref('auto', v))),
+    row('闪卡顺序', seg([[true, '随机'], [false, '原顺序']], pref('flash_random', true), v => { setPref('flash_random', v); WV.deck = null; }))]),
+    el('p', { class: 'meta', text: '做题记录、收藏、生词本存在这台手机的浏览器里。' })]));
+}
+$('#gear').onclick = settings;
+document.querySelectorAll('.tab-btn').forEach(b => b.onclick = () => { tab = b.dataset.tab; setPref('tab', tab); renderHome(); scrollTo(0, 0); });
+renderHome();
+load('words').catch(() => {});
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js');
+</script>
+</body>
+</html>
