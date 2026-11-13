@@ -1,6 +1,6 @@
 // App shell network-first; question banks, word texts and math images cache-first (refreshed in the background).
-const CACHE = 'gre-app-v2';
-const SHELL = ['./', './index.html', './review.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
+const CACHE = 'gre-app-v3';
+const SHELL = ['./', './index.html', './review.html', './manifest.webmanifest', './manifest-review.webmanifest', './icon-192.png', './icon-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL))); self.skipWaiting(); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', e => {
