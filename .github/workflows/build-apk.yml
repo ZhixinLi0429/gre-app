@@ -1,0 +1,200 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Create Android project
+        run: |
+          mkdir -p android/app/src/main/java/io/github/zhixinli0429/greapp
+          mkdir -p android/app/src/main/res/values
+          mkdir -p android/app/src/main/res/mipmap-hdpi
+          mkdir -p android/app/src/main/res/mipmap-xhdpi
+          mkdir -p android/app/src/main/res/mipmap-xxhdpi
+          mkdir -p android/app/src/main/res/xml
+
+          # Copy icons
+          cp icon-192.png android/app/src/main/res/mipmap-hdpi/ic_launcher.png
+          cp icon-512.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+          cp icon-192.png android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
+
+          # settings.gradle
+          cat > android/settings.gradle << 'GRADLE'
+          rootProject.name = 'GREReview'
+          include ':app'
+          GRADLE
+
+          # root build.gradle
+          cat > android/build.gradle << 'GRADLE'
+          buildscript {
+              repositories { google(); mavenCentral() }
+              dependencies { classpath 'com.android.tools.build:gradle:8.2.0' }
+          }
+          allprojects { repositories { google(); mavenCentral() } }
+          GRADLE
+
+          # gradle wrapper properties
+          mkdir -p android/gradle/wrapper
+          cat > android/gradle/wrapper/gradle-wrapper.properties << 'PROPS'
+          distributionUrl=https\://services.gradle.org/distributions/gradle-8.5-bin.zip
+          PROPS
+
+          # app build.gradle
+          cat > android/app/build.gradle << 'GRADLE'
+          plugins { id 'com.android.application' }
+          android {
+              namespace 'io.github.zhixinli0429.greapp'
+              compileSdk 34
+              defaultConfig {
+                  applicationId 'io.github.zhixinli0429.greapp'
+                  minSdk 24
+                  targetSdk 34
+                  versionCode 1
+                  versionName '1.0'
+              }
+              buildTypes {
+                  release {
+                      minifyEnabled false
+                  }
+              }
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_17
+                  targetCompatibility JavaVersion.VERSION_17
+              }
+          }
+          GRADLE
+
+          # AndroidManifest.xml
+          cat > android/app/src/main/AndroidManifest.xml << 'XML'
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <uses-permission android:name="android.permission.INTERNET"/>
+              <application
+                  android:allowBackup="true"
+                  android:icon="@mipmap/ic_launcher"
+                  android:label="GRE 复习"
+                  android:theme="@style/AppTheme"
+                  android:usesCleartextTraffic="true">
+                  <activity
+                      android:name=".MainActivity"
+                      android:exported="true"
+                      android:configChanges="orientation|screenSize">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN"/>
+                          <category android:name="android.intent.category.LAUNCHER"/>
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+          XML
+
+          # styles
+          cat > android/app/src/main/res/values/styles.xml << 'XML'
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <style name="AppTheme" parent="android:Theme.Material.Light.NoActionBar">
+                  <item name="android:statusBarColor">#ffffff</item>
+                  <item name="android:navigationBarColor">#ffffff</item>
+                  <item name="android:windowLightStatusBar">true</item>
+              </style>
+          </resources>
+          XML
+
+          # network security config
+          cat > android/app/src/main/res/xml/network_security_config.xml << 'XML'
+          <?xml version="1.0" encoding="utf-8"?>
+          <network-security-config>
+              <domain-config cleartextTrafficPermitted="false">
+                  <domain includeSubdomains="true">zhixinli0429.github.io</domain>
+              </domain-config>
+          </network-security-config>
+          XML
+
+          # MainActivity.java
+          cat > android/app/src/main/java/io/github/zhixinli0429/greapp/MainActivity.java << 'JAVA'
+          package io.github.zhixinli0429.greapp;
+
+          import android.app.Activity;
+          import android.os.Bundle;
+          import android.view.View;
+          import android.view.Window;
+          import android.view.WindowManager;
+          import android.webkit.WebChromeClient;
+          import android.webkit.WebSettings;
+          import android.webkit.WebView;
+          import android.webkit.WebViewClient;
+
+          public class MainActivity extends Activity {
+              private WebView webView;
+
+              @Override
+              protected void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+                  webView = new WebView(this);
+                  setContentView(webView);
+
+                  WebSettings s = webView.getSettings();
+                  s.setJavaScriptEnabled(true);
+                  s.setDomStorageEnabled(true);
+                  s.setCacheMode(WebSettings.LOAD_DEFAULT);
+                  s.setAllowFileAccess(false);
+                  s.setUseWideViewPort(true);
+                  s.setLoadWithOverviewMode(true);
+
+                  webView.setWebViewClient(new WebViewClient());
+                  webView.setWebChromeClient(new WebChromeClient());
+                  webView.loadUrl("https://zhixinli0429.github.io/gre-app/review.html");
+              }
+
+              @Override
+              public void onBackPressed() {
+                  if (webView.canGoBack()) webView.goBack();
+                  else super.onBackPressed();
+              }
+          }
+          JAVA
+
+      - name: Generate Gradle wrapper
+        working-directory: android
+        run: |
+          gradle wrapper --gradle-version 8.5
+
+      - name: Build APK
+        working-directory: android
+        run: ./gradlew assembleRelease
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: gre-review
+          path: android/app/build/outputs/apk/release/app-release-unsigned.apk
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: GRE 复习 v1.0.${{ github.run_number }}
+          files: android/app/build/outputs/apk/release/app-release-unsigned.apk
+          generate_release_notes: false
+          body: |
+            GRE 复习 Android App
+
+            下载 app-release-unsigned.apk 安装到手机。
+            安装前需在手机设置中允许"安装未知来源应用"。
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
