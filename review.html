@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>GRE 复习</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+:root{--blue:#5e35b1;--soft:#ede7f6;--line:#e6e8eb;--ok:#2e7d32;--bad:#c62828;--bg:#f5f5f7;--fs:15px}
+html,body{overscroll-behavior-y:contain}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:#111;font-size:var(--fs);line-height:1.6}
+[hidden]{display:none!important}
+button{cursor:pointer;font:inherit;color:inherit;border:none;background:none}
+
+/* --- Top bar --- */
+.top{position:sticky;top:0;z-index:100;background:#fff;padding-top:env(safe-area-inset-top);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.nav-row{display:flex;align-items:center;padding:8px 12px;gap:8px}
+.nav-row .back{font-size:22px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;color:#555}
+.nav-row .back:active{background:#eee}
+.nav-row .title{font-size:17px;font-weight:700;flex:1}
+.tab-bar{display:flex;border-top:1px solid var(--line)}
+.tab-btn{flex:1;padding:10px 4px 8px;font-size:14px;font-weight:600;color:#888;border-bottom:3px solid transparent;transition:color .15s}
+.tab-btn.active{color:var(--blue);border-bottom-color:var(--blue)}
+
+/* --- Filter bar --- */
+.filter-bar{display:flex;align-items:center;gap:8px;padding:8px 14px;border-bottom:1px solid var(--line);background:#fafafe;overflow-x:auto;scrollbar-width:none}
+.filter-bar::-webkit-scrollbar{display:none}
+.fbtn{padding:5px 14px;border-radius:16px;font-size:13px;white-space:nowrap;border:1px solid #d0d7de;background:#fff;transition:all .15s}
+.fbtn.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.counter{margin-left:auto;font-size:12px;color:#888;white-space:nowrap;flex-shrink:0}
+.search-bar{padding:6px 14px;border-bottom:1px solid var(--line);background:#fafafe}
+.search-bar input{width:100%;padding:8px 12px;border:1px solid #d0d7de;border-radius:20px;font-size:14px;background:#fff;outline:none}
+.search-bar input:focus{border-color:var(--blue)}
+
+/* --- Loading --- */
+.loading{text-align:center;padding:60px 20px;color:#888}
+.loading .spin{display:inline-block;width:28px;height:28px;border:3px solid #ddd;border-top-color:var(--blue);border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* --- Flashcard --- */
+.fc-wrap{padding:16px 14px calc(80px + env(safe-area-inset-bottom));max-width:600px;margin:0 auto}
+.fc-card{perspective:1000px;min-height:56vh;margin-bottom:14px;cursor:pointer;-webkit-user-select:none;user-select:none}
+.fc-inner{position:relative;width:100%;min-height:56vh;transition:transform .45s;transform-style:preserve-3d}
+.fc-card.flipped .fc-inner{transform:rotateY(180deg)}
+.fc-front,.fc-back{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.1);padding:24px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow-y:auto}
+.fc-back{transform:rotateY(180deg);align-items:stretch;justify-content:flex-start}
+.fc-word{font-size:2em;font-weight:700;text-align:center;margin-bottom:8px}
+.fc-phon{font-size:.95em;color:#888;margin-bottom:16px}
+.fc-hint{font-size:13px;color:#bbb}
+.fc-meanings{font-size:1.05em;margin-bottom:12px}
+.fc-meanings li{margin:4px 0;list-style:none}
+.fc-meanings li::before{content:'• ';color:var(--blue)}
+.fc-ex{background:#f8f8fc;border-radius:8px;padding:10px 12px;margin:6px 0;font-size:.9em;line-height:1.6}
+.fc-ex .en{color:#333}.fc-ex .cn{color:#888;font-size:.9em}
+.fc-detail{margin-top:12px;border-top:1px solid var(--line);padding-top:12px;font-size:.88em;color:#555;line-height:1.7}
+.fc-detail h3{font-size:1em;font-weight:700;color:#333;margin:10px 0 4px}
+.fc-detail h4{font-size:.95em;font-weight:600;color:var(--blue);margin:8px 0 2px}
+.fc-detail p{margin:3px 0}
+.fc-detail ul,.fc-detail ol{padding-left:18px;margin:3px 0}
+.fc-detail blockquote{border-left:3px solid #d1c4e9;padding-left:10px;color:#666;margin:6px 0}
+
+.fc-controls{display:flex;align-items:center;justify-content:center;gap:16px;padding:14px 0}
+.fc-btn{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;border:1.5px solid #ddd;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.08);transition:all .15s}
+.fc-btn:active{transform:scale(.92)}
+.fc-btn.master{border-color:#a5d6a7}
+.fc-btn.master.on{background:#e8f5e9;border-color:var(--ok);color:var(--ok)}
+.fc-btn.shuf{border-color:#d1c4e9}
+.fc-btn.prev,.fc-btn.next{font-size:20px}
+.fc-btn:disabled{opacity:.3}
+.fc-progress{text-align:center;font-size:13px;color:#888;margin-top:4px}
+
+/* --- Alphabet sidebar --- */
+.alpha{position:fixed;right:2px;top:50%;transform:translateY(-50%);z-index:50;display:flex;flex-direction:column;align-items:center}
+.alpha button{font-size:10px;padding:1px 5px;color:#888;line-height:1.5;border-radius:3px}
+.alpha button:active,.alpha button.cur{color:var(--blue);font-weight:700;background:var(--soft)}
+
+/* --- Question list --- */
+.q-list{padding:8px 12px calc(20px + env(safe-area-inset-bottom));max-width:800px;margin:0 auto}
+.q-card{background:#fff;border-radius:10px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden;border:1px solid #eee}
+.q-card.reviewed{border-left:3px solid var(--ok)}
+.q-header{padding:12px 14px;display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.q-header:active{background:#fafafe}
+.q-meta{font-size:11px;color:#999;margin-bottom:3px}
+.q-stem-preview{font-size:14px;line-height:1.5;flex:1;min-width:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.q-star{font-size:20px;color:#ccc;flex-shrink:0;padding:2px}
+.q-star.on{color:#f5a623}
+.q-body{padding:0 14px 14px;display:none}
+.q-card.open .q-body{display:block}
+.q-card.open .q-stem-preview{-webkit-line-clamp:unset}
+.q-stem-full{line-height:1.7;margin-bottom:12px;font-size:15px}
+.q-stem-full .blank{display:inline-block;border-bottom:2px solid #999;min-width:100px;height:1.2em;vertical-align:bottom;margin:0 2px}
+.q-zh{color:#666;font-size:.9em;margin:-6px 0 12px;line-height:1.6}
+.q-opts{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.q-opt{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:8px;border:1.5px solid #eee;background:#fff;line-height:1.5}
+.q-opt .letter{font-weight:600;color:#888;min-width:18px;flex-shrink:0}
+.q-opt .txt{flex:1;min-width:0}
+.q-opt .cn{color:#888;font-size:.85em}
+.q-opt.correct{border-color:var(--ok);background:#f0faf2}
+.q-opt.correct .letter{color:var(--ok)}
+.q-opt.wrong{border-color:var(--bad);background:#fff5f5}
+.q-opt.wrong .letter{color:var(--bad)}
+.q-opt .tag{margin-left:auto;font-size:11px;font-weight:600;white-space:nowrap;flex-shrink:0}
+.q-opt.correct .tag{color:var(--ok)}
+.q-opt.wrong .tag{color:var(--bad)}
+.q-group-label{font-size:12px;color:#888;font-weight:600;margin:10px 0 4px}
+.q-analysis{background:#f6f8e8;border-radius:8px;padding:12px;margin-top:10px;font-size:.9em;line-height:1.7;color:#444}
+.q-analysis h3{font-size:1em;font-weight:700;margin:8px 0 4px}
+.q-analysis h4{font-size:.95em;font-weight:600;color:var(--blue);margin:6px 0 2px}
+.q-analysis p{margin:4px 0}
+.q-analysis ul,.q-analysis ol{padding-left:18px;margin:4px 0}
+.q-analysis blockquote{border-left:3px solid #d1c4e9;padding-left:10px;color:#666;margin:6px 0}
+.q-answer-label{font-size:13px;font-weight:600;color:var(--ok);margin-bottom:6px}
+
+.empty{text-align:center;padding:60px 20px;color:#999;font-size:15px}
+
+/* --- Word list mode --- */
+.word-list-wrap{padding:8px 12px calc(20px + env(safe-area-inset-bottom));max-width:800px;margin:0 auto}
+.word-row{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#fff;border-bottom:1px solid #f0f0f0;cursor:pointer}
+.word-row:first-child{border-radius:10px 10px 0 0}
+.word-row:last-child{border-radius:0 0 10px 10px;border-bottom:none}
+.word-row:active{background:#fafafe}
+.word-row .w{font-weight:600;min-width:100px}
+.word-row .m{flex:1;color:#666;font-size:.9em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.word-row .star{font-size:18px;color:#ccc;flex-shrink:0}
+.word-row .star.on{color:#f5a623}
+.word-row.mastered .w{color:#aaa}
+
+/* --- Mode toggle (flashcard vs list) --- */
+.mode-toggle{display:flex;align-items:center;gap:4px;margin-left:8px}
+.mode-toggle button{padding:4px 10px;border-radius:12px;font-size:12px;border:1px solid #d0d7de;background:#fff}
+.mode-toggle button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+</style>
+</head>
+<body>
+
+<div class="top" id="top">
+  <div class="nav-row">
+    <button class="back" onclick="location.href='index.html'" title="返回">←</button>
+    <span class="title">GRE 复习</span>
+  </div>
+  <div class="tab-bar" id="tabBar">
+    <button class="tab-btn active" data-tab="words">单词闪卡</button>
+    <button class="tab-btn" data-tab="starred">收藏题</button>
+    <button class="tab-btn" data-tab="wrong">错题</button>
+  </div>
+</div>
+
+<div id="wordsFilter" class="filter-bar">
+  <button class="fbtn on" data-f="all">全部</button>
+  <button class="fbtn" data-f="unmastered">未掌握</button>
+  <button class="fbtn" data-f="mastered">已掌握</button>
+  <div class="mode-toggle">
+    <button class="on" data-mode="flash">闪卡</button>
+    <button data-mode="list">列表</button>
+  </div>
+  <span class="counter" id="wordCounter"></span>
+</div>
+<div id="wordsSearch" class="search-bar">
+  <input type="text" id="wordSearchInput" placeholder="搜索单词...">
+</div>
+
+<div id="starredFilter" class="filter-bar" hidden>
+  <button class="fbtn on" data-f="all">全部</button>
+  <button class="fbtn" data-f="unreviewed">未复习</button>
+  <button class="fbtn" data-f="reviewed">已复习</button>
+  <span class="counter" id="starredCounter"></span>
+</div>
+
+<div id="wrongFilter" class="filter-bar" hidden>
+  <button class="fbtn on" data-f="all">全部</button>
+  <button class="fbtn" data-f="unreviewed">未复习</button>
+  <button class="fbtn" data-f="reviewed">已复习</button>
+  <span class="counter" id="wrongCounter"></span>
+</div>
+
+<div id="panel"></div>
+<div class="alpha" id="alpha" hidden></div>
+
+<script>
+'use strict';
+const STORE_KEY = 'gre_review_v1';
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+
+let DATA = null;
+let state = loadState();
+let currentTab = 'words';
+let wordMode = 'flash';
+let wordIdx = 0;
+let wordFilter = 'all';
+let wordSearch = '';
+let starredFilter = 'all';
+let wrongFilter = 'all';
+let filteredWords = [];
+let flipped = false;
+
+function loadState() {
+  try { return JSON.parse(localStorage.getItem(STORE_KEY)) || { mastered: {}, reviewed: {} }; }
+  catch { return { mastered: {}, reviewed: {} }; }
+}
+function persist() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch {}
+}
+
+async function loadData() {
+  if (DATA) return DATA;
+  $('#panel').innerHTML = '<div class="loading"><div class="spin"></div><p>加载数据...</p></div>';
+  const r = await fetch('data/my_gre_data.json');
+  DATA = await r.json();
+  return DATA;
+}
+
+function md(text) {
+  if (!text) return '';
+  return text
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/`(.+?)`/g, '<code>$1</code>')
+    .replace(/^[-*] (.+)$/gm, '<li>$1</li>')
+    .replace(/^(\d+)\. (.+)$/gm, '<li>$2</li>')
+    .replace(/(<li>.*<\/li>\n?)+/g, m => '<ul>' + m + '</ul>')
+    .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
+    .replace(/\n{2,}/g, '</p><p>')
+    .replace(/\n/g, '<br>')
+    .replace(/^/, '<p>').replace(/$/, '</p>')
+    .replace(/<p><(h[34]|ul|ol|blockquote|li)/g, '<$1')
+    .replace(/<\/(h[34]|ul|ol|blockquote|li)><\/p>/g, '</$1>')
+    .replace(/<p><\/p>/g, '');
+}
+
+function stemHtml(text) {
+  if (!text) return '';
+  return text
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/_{3,}/g, '<span class="blank"></span>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+}
+
+// --- Tabs ---
+$$('.tab-btn').forEach(b => b.addEventListener('click', () => {
+  currentTab = b.dataset.tab;
+  $$('.tab-btn').forEach(t => t.classList.toggle('active', t === b));
+  render();
+}));
+
+// --- Filter bars ---
+document.addEventListener('click', e => {
+  const fb = e.target.closest('.fbtn');
+  if (!fb) return;
+  const bar = fb.closest('.filter-bar');
+  bar.querySelectorAll('.fbtn').forEach(b => b.classList.toggle('on', b === fb));
+  const f = fb.dataset.f;
+  if (bar.id === 'wordsFilter') { wordFilter = f; wordIdx = 0; flipped = false; }
+  else if (bar.id === 'starredFilter') starredFilter = f;
+  else if (bar.id === 'wrongFilter') wrongFilter = f;
+  render();
+});
+
+// --- Mode toggle ---
+document.addEventListener('click', e => {
+  const mb = e.target.closest('.mode-toggle button');
+  if (!mb) return;
+  wordMode = mb.dataset.mode;
+  mb.closest('.mode-toggle').querySelectorAll('button').forEach(b => b.classList.toggle('on', b === mb));
+  wordIdx = 0; flipped = false;
+  render();
+});
+
+// --- Word search ---
+$('#wordSearchInput').addEventListener('input', e => {
+  wordSearch = e.target.value.trim().toLowerCase();
+  wordIdx = 0; flipped = false;
+  render();
+});
+
+// --- Render ---
+async function render() {
+  const data = await loadData();
+  $('#wordsFilter').hidden = currentTab !== 'words';
+  $('#wordsSearch').hidden = currentTab !== 'words';
+  $('#starredFilter').hidden = currentTab !== 'starred';
+  $('#wrongFilter').hidden = currentTab !== 'wrong';
+  $('#alpha').hidden = currentTab !== 'words' || wordMode !== 'flash';
+
+  if (currentTab === 'words') renderWords(data);
+  else if (currentTab === 'starred') renderQuestions(data.starredQuestions, 'starred', starredFilter);
+  else renderQuestions(data.wrongQuestions, 'wrong', wrongFilter);
+}
+
+function getFilteredWords(data) {
+  let words = data.starredWords;
+  if (wordFilter === 'mastered') words = words.filter(w => state.mastered[w.id]);
+  else if (wordFilter === 'unmastered') words = words.filter(w => !state.mastered[w.id]);
+  if (wordSearch) words = words.filter(w =>
+    w.en.toLowerCase().includes(wordSearch) ||
+    w.meanings.some(m => m.includes(wordSearch))
+  );
+  return words;
+}
+
+function renderWords(data) {
+  filteredWords = getFilteredWords(data);
+  const total = filteredWords.length;
+  const masteredCount = data.starredWords.filter(w => state.mastered[w.id]).length;
+  $('#wordCounter').textContent = masteredCount + '/' + data.starredWords.length + ' 已掌握';
+
+  if (wordMode === 'flash') renderFlashcard(filteredWords, total);
+  else renderWordList(filteredWords);
+  renderAlphabet();
+}
+
+function renderFlashcard(words, total) {
+  if (!words.length) { $('#panel').innerHTML = '<div class="empty">暂无单词</div>'; return; }
+  if (wordIdx >= words.length) wordIdx = words.length - 1;
+  if (wordIdx < 0) wordIdx = 0;
+  const w = words[wordIdx];
+  const isMastered = state.mastered[w.id];
+
+  const exHtml = (w.examples || []).map(ex =>
+    '<div class="fc-ex"><div class="en">' + esc(ex[0] || '') + '</div>' +
+    (ex[1] ? '<div class="cn">' + esc(ex[1]) + '</div>' : '') + '</div>'
+  ).join('');
+
+  const meanHtml = w.meanings.map(m => '<li>' + esc(m) + '</li>').join('');
+
+  $('#panel').innerHTML =
+    '<div class="fc-wrap">' +
+      '<div class="fc-card' + (flipped ? ' flipped' : '') + '" id="fcCard">' +
+        '<div class="fc-inner">' +
+          '<div class="fc-front">' +
+            '<div class="fc-word">' + esc(w.en) + '</div>' +
+            (w.phonetics[0] ? '<div class="fc-phon">' + esc(w.phonetics[0]) + '</div>' : '') +
+            '<div class="fc-hint">点击翻面</div>' +
+          '</div>' +
+          '<div class="fc-back">' +
+            '<div class="fc-word" style="font-size:1.4em;text-align:left">' + esc(w.en) + '</div>' +
+            (w.phonetics[0] ? '<div class="fc-phon" style="text-align:left;margin-bottom:10px">' + esc(w.phonetics[0]) + '</div>' : '') +
+            '<ul class="fc-meanings">' + meanHtml + '</ul>' +
+            exHtml +
+            (w.detail ? '<div class="fc-detail">' + md(w.detail) + '</div>' : '') +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="fc-controls">' +
+        '<button class="fc-btn prev" id="fcPrev" ' + (wordIdx <= 0 ? 'disabled' : '') + '>‹</button>' +
+        '<button class="fc-btn shuf" id="fcShuf" title="随机">🔀</button>' +
+        '<button class="fc-btn master' + (isMastered ? ' on' : '') + '" id="fcMaster" title="标记已掌握">✓</button>' +
+        '<button class="fc-btn next" id="fcNext" ' + (wordIdx >= total - 1 ? 'disabled' : '') + '>›</button>' +
+      '</div>' +
+      '<div class="fc-progress">' + (wordIdx + 1) + ' / ' + total + '</div>' +
+    '</div>';
+
+  $('#fcCard').addEventListener('click', e => {
+    if (e.target.closest('.fc-controls') || e.target.closest('.fc-detail a')) return;
+    flipped = !flipped;
+    $('#fcCard').classList.toggle('flipped', flipped);
+  });
+  $('#fcPrev').addEventListener('click', e => { e.stopPropagation(); wordIdx--; flipped = false; render(); });
+  $('#fcNext').addEventListener('click', e => { e.stopPropagation(); wordIdx++; flipped = false; render(); });
+  $('#fcShuf').addEventListener('click', e => {
+    e.stopPropagation();
+    wordIdx = Math.floor(Math.random() * filteredWords.length);
+    flipped = false; render();
+  });
+  $('#fcMaster').addEventListener('click', e => {
+    e.stopPropagation();
+    state.mastered[w.id] = !state.mastered[w.id];
+    if (!state.mastered[w.id]) delete state.mastered[w.id];
+    persist(); render();
+  });
+
+  setupSwipe();
+}
+
+function renderWordList(words) {
+  if (!words.length) { $('#panel').innerHTML = '<div class="empty">暂无单词</div>'; return; }
+  let html = '<div class="word-list-wrap">';
+  words.forEach(w => {
+    const m = state.mastered[w.id];
+    html += '<div class="word-row' + (m ? ' mastered' : '') + '" data-id="' + w.id + '">' +
+      '<span class="w">' + esc(w.en) + '</span>' +
+      '<span class="m">' + esc(w.meanings.join('; ')) + '</span>' +
+      '<button class="star' + (m ? ' on' : '') + '" data-wid="' + w.id + '">★</button>' +
+    '</div>';
+  });
+  html += '</div>';
+  $('#panel').innerHTML = html;
+
+  $$('.word-row .star').forEach(b => b.addEventListener('click', e => {
+    e.stopPropagation();
+    const id = b.dataset.wid;
+    state.mastered[id] = !state.mastered[id];
+    if (!state.mastered[id]) delete state.mastered[id];
+    persist(); render();
+  }));
+  $$('.word-row').forEach(row => row.addEventListener('click', () => {
+    const id = row.dataset.id;
+    const idx = filteredWords.findIndex(w => w.id === id);
+    if (idx >= 0) { wordIdx = idx; wordMode = 'flash'; flipped = true; updateModeToggle(); render(); }
+  }));
+}
+
+function updateModeToggle() {
+  $$('.mode-toggle button').forEach(b => b.classList.toggle('on', b.dataset.mode === wordMode));
+}
+
+function renderAlphabet() {
+  if (currentTab !== 'words' || wordMode !== 'flash') { $('#alpha').hidden = true; return; }
+  $('#alpha').hidden = false;
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const curLetter = filteredWords[wordIdx] ? filteredWords[wordIdx].en[0].toUpperCase() : '';
+  let html = '';
+  letters.split('').forEach(l => {
+    const idx = filteredWords.findIndex(w => w.en[0].toUpperCase() >= l);
+    html += '<button data-idx="' + Math.max(0, idx) + '"' + (l === curLetter ? ' class="cur"' : '') + '>' + l + '</button>';
+  });
+  $('#alpha').innerHTML = html;
+  $$('#alpha button').forEach(b => b.addEventListener('click', () => {
+    wordIdx = parseInt(b.dataset.idx) || 0;
+    flipped = false; render();
+  }));
+}
+
+// --- Swipe ---
+function setupSwipe() {
+  const card = $('#fcCard');
+  if (!card) return;
+  let sx = 0, sy = 0, moved = false;
+  card.addEventListener('touchstart', e => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; moved = false; }, { passive: true });
+  card.addEventListener('touchmove', e => {
+    const dx = e.touches[0].clientX - sx;
+    const dy = e.touches[0].clientY - sy;
+    if (Math.abs(dx) > 30 && Math.abs(dx) > Math.abs(dy)) moved = true;
+  }, { passive: true });
+  card.addEventListener('touchend', e => {
+    if (!moved) return;
+    const dx = e.changedTouches[0].clientX - sx;
+    if (dx < -50 && wordIdx < filteredWords.length - 1) { wordIdx++; flipped = false; render(); }
+    else if (dx > 50 && wordIdx > 0) { wordIdx--; flipped = false; render(); }
+  });
+}
+
+// --- Questions ---
+function getFilteredQs(questions, filter) {
+  if (filter === 'reviewed') return questions.filter(q => state.reviewed[q.key]);
+  if (filter === 'unreviewed') return questions.filter(q => !state.reviewed[q.key]);
+  return questions;
+}
+
+function renderQuestions(questions, type, filter) {
+  const qs = getFilteredQs(questions, filter);
+  const reviewedCount = questions.filter(q => state.reviewed[q.key]).length;
+  const counterId = type + 'Counter';
+  $('#' + counterId).textContent = reviewedCount + '/' + questions.length + ' 已复习';
+
+  if (!qs.length) { $('#panel').innerHTML = '<div class="empty">暂无题目</div>'; return; }
+
+  let html = '<div class="q-list">';
+  qs.forEach((q, i) => {
+    const isReviewed = state.reviewed[q.key];
+    html += '<div class="q-card' + (isReviewed ? ' reviewed' : '') + '" data-qi="' + i + '">';
+    html += '<div class="q-header">';
+    html += '<div style="flex:1;min-width:0">';
+    html += '<div class="q-meta">' + esc(q.book || '') + (q.number ? ' #' + q.number : '') + '</div>';
+    html += '<div class="q-stem-preview">' + stemHtml(q.stem || '') + '</div>';
+    html += '</div>';
+    html += '<button class="q-star' + (isReviewed ? ' on' : '') + '" data-key="' + esc(q.key) + '">★</button>';
+    html += '</div>';
+    html += '<div class="q-body">' + renderQuestionBody(q) + '</div>';
+    html += '</div>';
+  });
+  html += '</div>';
+  $('#panel').innerHTML = html;
+
+  $$('.q-header').forEach(h => h.addEventListener('click', e => {
+    if (e.target.closest('.q-star')) return;
+    const card = h.closest('.q-card');
+    card.classList.toggle('open');
+  }));
+  $$('.q-star').forEach(b => b.addEventListener('click', e => {
+    e.stopPropagation();
+    const key = b.dataset.key;
+    state.reviewed[key] = !state.reviewed[key];
+    if (!state.reviewed[key]) delete state.reviewed[key];
+    b.classList.toggle('on', !!state.reviewed[key]);
+    b.closest('.q-card').classList.toggle('reviewed', !!state.reviewed[key]);
+    persist();
+    const counterId2 = currentTab + 'Counter';
+    const allQs = currentTab === 'starred' ? DATA.starredQuestions : DATA.wrongQuestions;
+    const rc = allQs.filter(q => state.reviewed[q.key]).length;
+    $('#' + counterId2).textContent = rc + '/' + allQs.length + ' 已复习';
+  }));
+}
+
+function renderQuestionBody(q) {
+  let html = '';
+  html += '<div class="q-stem-full">' + stemHtml(q.stem || '') + '</div>';
+  if (q.translation) html += '<div class="q-zh">' + esc(q.translation) + '</div>';
+
+  const LETTERS = 'ABCDEFGHIJKLMN';
+  const myAns = q.myAnswer;
+
+  if (q.mode === 'grouped' && q.optionGroups) {
+    q.optionGroups.forEach((group, gi) => {
+      if (q.optionGroups.length > 1) html += '<div class="q-group-label">空格 ' + (gi + 1) + '</div>';
+      html += '<div class="q-opts">';
+      group.forEach((opt, oi) => {
+        const isCorrect = q.answers[gi] === oi;
+        const isMyPick = myAns && Array.isArray(myAns.selected) && myAns.selected[gi] === oi;
+        const isWrongPick = isMyPick && !isCorrect;
+        let cls = 'q-opt';
+        if (isCorrect) cls += ' correct';
+        else if (isWrongPick) cls += ' wrong';
+        html += '<div class="' + cls + '">';
+        html += '<span class="letter">' + LETTERS[oi] + '</span>';
+        html += '<span class="txt">' + esc(opt.text) + (opt.cn ? '<span class="cn"> ' + esc(opt.cn) + '</span>' : '') + '</span>';
+        if (isCorrect) html += '<span class="tag">✓ 正确</span>';
+        else if (isWrongPick) html += '<span class="tag">✗ 你选</span>';
+        html += '</div>';
+      });
+      html += '</div>';
+    });
+  } else if (q.mode === 'multi' && q.optionGroups && q.optionGroups[0]) {
+    html += '<div class="q-opts">';
+    q.optionGroups[0].forEach((opt, oi) => {
+      const isCorrect = q.answers.includes(oi);
+      const isMyPick = myAns && Array.isArray(myAns.selected) && myAns.selected.includes(oi);
+      const isWrongPick = isMyPick && !isCorrect;
+      let cls = 'q-opt';
+      if (isCorrect) cls += ' correct';
+      else if (isWrongPick) cls += ' wrong';
+      html += '<div class="' + cls + '">';
+      html += '<span class="letter">' + LETTERS[oi] + '</span>';
+      html += '<span class="txt">' + esc(opt.text) + (opt.cn ? '<span class="cn"> ' + esc(opt.cn) + '</span>' : '') + '</span>';
+      if (isCorrect) html += '<span class="tag">✓ 正确</span>';
+      else if (isWrongPick) html += '<span class="tag">✗ 你选</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+  } else if (q.options) {
+    html += '<div class="q-opts">';
+    q.options.forEach((opt, oi) => {
+      if (opt.text.includes('不认识') || opt.text.includes('模糊')) return;
+      const isCorrect = q.answers[0] === oi;
+      const isMyPick = myAns && myAns.selected === oi;
+      const isWrongPick = isMyPick && !isCorrect;
+      let cls = 'q-opt';
+      if (isCorrect) cls += ' correct';
+      else if (isWrongPick) cls += ' wrong';
+      html += '<div class="' + cls + '">';
+      html += '<span class="letter">' + LETTERS[oi] + '</span>';
+      html += '<span class="txt">' + esc(opt.text) + (opt.cn ? '<span class="cn"> ' + esc(opt.cn) + '</span>' : '') + '</span>';
+      if (isCorrect) html += '<span class="tag">✓ 正确</span>';
+      else if (isWrongPick) html += '<span class="tag">✗ 你选</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  html += '<div class="q-answer-label">答案: ' + esc(q.answerLabel || '') + '</div>';
+  if (q.analysisText) html += '<div class="q-analysis">' + md(q.analysisText) + '</div>';
+  return html;
+}
+
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// --- Keyboard ---
+document.addEventListener('keydown', e => {
+  if (currentTab !== 'words' || wordMode !== 'flash') return;
+  if (e.target.tagName === 'INPUT') return;
+  if (e.key === ' ' || e.key === 'Enter') { flipped = !flipped; const c = $('#fcCard'); if (c) c.classList.toggle('flipped', flipped); e.preventDefault(); }
+  else if (e.key === 'ArrowLeft' && wordIdx > 0) { wordIdx--; flipped = false; render(); }
+  else if (e.key === 'ArrowRight' && wordIdx < filteredWords.length - 1) { wordIdx++; flipped = false; render(); }
+});
+
+// --- Init ---
+render();
+</script>
+</body>
+</html>
