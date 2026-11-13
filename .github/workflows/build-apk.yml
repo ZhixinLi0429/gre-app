@@ -16,9 +16,6 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Create Android project
         run: |
           mkdir -p android/app/src/main/java/io/github/zhixinli0429/greapp
@@ -28,34 +25,26 @@ jobs:
           mkdir -p android/app/src/main/res/mipmap-xxhdpi
           mkdir -p android/app/src/main/res/xml
 
-          # Copy icons
           cp icon-192.png android/app/src/main/res/mipmap-hdpi/ic_launcher.png
           cp icon-512.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
           cp icon-192.png android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
 
-          # settings.gradle
-          cat > android/settings.gradle << 'GRADLE'
+          cat > android/settings.gradle <<'EOF'
           rootProject.name = 'GREReview'
           include ':app'
-          GRADLE
+          EOF
+          sed -i 's/^          //' android/settings.gradle
 
-          # root build.gradle
-          cat > android/build.gradle << 'GRADLE'
+          cat > android/build.gradle <<'EOF'
           buildscript {
               repositories { google(); mavenCentral() }
               dependencies { classpath 'com.android.tools.build:gradle:8.2.0' }
           }
           allprojects { repositories { google(); mavenCentral() } }
-          GRADLE
+          EOF
+          sed -i 's/^          //' android/build.gradle
 
-          # gradle wrapper properties
-          mkdir -p android/gradle/wrapper
-          cat > android/gradle/wrapper/gradle-wrapper.properties << 'PROPS'
-          distributionUrl=https\://services.gradle.org/distributions/gradle-8.5-bin.zip
-          PROPS
-
-          # app build.gradle
-          cat > android/app/build.gradle << 'GRADLE'
+          cat > android/app/build.gradle <<'EOF'
           plugins { id 'com.android.application' }
           android {
               namespace 'io.github.zhixinli0429.greapp'
@@ -77,10 +66,10 @@ jobs:
                   targetCompatibility JavaVersion.VERSION_17
               }
           }
-          GRADLE
+          EOF
+          sed -i 's/^          //' android/app/build.gradle
 
-          # AndroidManifest.xml
-          cat > android/app/src/main/AndroidManifest.xml << 'XML'
+          cat > android/app/src/main/AndroidManifest.xml <<'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
               <uses-permission android:name="android.permission.INTERNET"/>
@@ -101,10 +90,10 @@ jobs:
                   </activity>
               </application>
           </manifest>
-          XML
+          EOF
+          sed -i 's/^          //' android/app/src/main/AndroidManifest.xml
 
-          # styles
-          cat > android/app/src/main/res/values/styles.xml << 'XML'
+          cat > android/app/src/main/res/values/styles.xml <<'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <resources>
               <style name="AppTheme" parent="android:Theme.Material.Light.NoActionBar">
@@ -113,27 +102,14 @@ jobs:
                   <item name="android:windowLightStatusBar">true</item>
               </style>
           </resources>
-          XML
+          EOF
+          sed -i 's/^          //' android/app/src/main/res/values/styles.xml
 
-          # network security config
-          cat > android/app/src/main/res/xml/network_security_config.xml << 'XML'
-          <?xml version="1.0" encoding="utf-8"?>
-          <network-security-config>
-              <domain-config cleartextTrafficPermitted="false">
-                  <domain includeSubdomains="true">zhixinli0429.github.io</domain>
-              </domain-config>
-          </network-security-config>
-          XML
-
-          # MainActivity.java
-          cat > android/app/src/main/java/io/github/zhixinli0429/greapp/MainActivity.java << 'JAVA'
+          cat > android/app/src/main/java/io/github/zhixinli0429/greapp/MainActivity.java <<'EOF'
           package io.github.zhixinli0429.greapp;
 
           import android.app.Activity;
           import android.os.Bundle;
-          import android.view.View;
-          import android.view.Window;
-          import android.view.WindowManager;
           import android.webkit.WebChromeClient;
           import android.webkit.WebSettings;
           import android.webkit.WebView;
@@ -152,7 +128,6 @@ jobs:
                   s.setJavaScriptEnabled(true);
                   s.setDomStorageEnabled(true);
                   s.setCacheMode(WebSettings.LOAD_DEFAULT);
-                  s.setAllowFileAccess(false);
                   s.setUseWideViewPort(true);
                   s.setLoadWithOverviewMode(true);
 
@@ -167,16 +142,15 @@ jobs:
                   else super.onBackPressed();
               }
           }
-          JAVA
-
-      - name: Generate Gradle wrapper
-        working-directory: android
-        run: |
-          gradle wrapper --gradle-version 8.5
+          EOF
+          sed -i 's/^          //' android/app/src/main/java/io/github/zhixinli0429/greapp/MainActivity.java
 
       - name: Build APK
         working-directory: android
-        run: ./gradlew assembleRelease
+        run: |
+          export ANDROID_HOME=$ANDROID_SDK_ROOT
+          gradle wrapper --gradle-version 8.5
+          ./gradlew assembleRelease
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
